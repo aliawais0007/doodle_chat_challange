@@ -31,4 +31,4 @@ test-results
 .github/copilot-instructions.md
 
 # Local backend workspace (kept outside this repo)
-api/
+/api/
