@@ -61,10 +61,16 @@ const toLiveAnnouncement = (messages: Array<{ author: string; message: string }>
 }
 
 const formatMessageTime = (createdAt: string) => {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(createdAt))
+    hour12: false,
+  })
+    .format(new Date(createdAt))
+    .replace(',', '')
 }
 
 const isOwnMessage = (author: string, displayName: string | null) => {
@@ -224,7 +230,7 @@ const TimelineMessage = ({
             ) : null}
           </div>
         ) : null}
-        <div className={["mt-2 flex", ownMessage ? 'justify-end' : 'justify-start'].join(' ')}>
+        <div className={['mt-2 flex', ownMessage ? 'justify-end' : 'justify-start'].join(' ')}>
           <time className="chat-message-time text-sm" dateTime={item.message.createdAt}>
             {formatMessageTime(item.message.createdAt)}
           </time>
@@ -552,7 +558,10 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
   }, [hasOlderMessages, initialError, initialLoading, requestOlderMessages])
 
   return (
-    <main className="chat-page flex h-dvh min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--app-text)]" role="main">
+    <main
+      className="chat-page flex h-dvh min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--app-text)]"
+      role="main"
+    >
       <header className="chat-header sticky top-0 z-10">
         <div className="chat-shell mx-auto flex w-full items-start justify-between gap-4">
           <div>

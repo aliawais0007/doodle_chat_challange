@@ -144,10 +144,7 @@ export const MessageComposer = ({
   return (
     <div className="chat-composer">
       <div className="chat-composer-shell">
-        <label
-          className="sr-only"
-          htmlFor="message-composer"
-        >
+        <label className="sr-only" htmlFor="message-composer">
           {label}
         </label>
         <div className="chat-composer-panel p-0 transition-shadow motion-reduce:transition-none focus-within:ring-2 focus-within:ring-[var(--app-focus-ring)]">
@@ -155,7 +152,7 @@ export const MessageComposer = ({
             <textarea
               aria-describedby={describedBy}
               aria-invalid={validationError !== null}
-              className="chat-input min-h-11 flex-1 resize-none bg-transparent px-3 py-2 text-sm leading-6 outline-none placeholder:text-[var(--app-muted)] chat-focus-ring"
+              className="chat-input min-h-12 flex-1 resize-none px-4 py-[0.875rem] text-base leading-6 outline-none placeholder:text-[var(--app-muted)] chat-focus-ring"
               disabled={disabled}
               id="message-composer"
               maxLength={maxLength}
@@ -175,7 +172,7 @@ export const MessageComposer = ({
             />
             <button
               aria-label="Send message"
-              className="chat-send-button chat-focus-ring flex min-h-11 min-w-11 items-center justify-center disabled:cursor-not-allowed motion-reduce:transition-none"
+              className="chat-send-button chat-focus-ring flex h-[3.3rem] min-h-11 min-w-11 items-center justify-center disabled:cursor-not-allowed motion-reduce:transition-none"
               disabled={disabled}
               onClick={() => {
                 void commitSubmission()
@@ -186,10 +183,10 @@ export const MessageComposer = ({
             </button>
           </div>
           <div className="sr-only">
-            <p id={descriptionId}>
-              {description}
-            </p>
-            {isNearLimit ? <p id={counterId}>{`${String(draftMessage.length)} / ${String(maxLength)}`}</p> : null}
+            <p id={descriptionId}>{description}</p>
+            {isNearLimit ? (
+              <p id={counterId}>{`${String(draftMessage.length)} / ${String(maxLength)}`}</p>
+            ) : null}
           </div>
           {validationError ? (
             <p
