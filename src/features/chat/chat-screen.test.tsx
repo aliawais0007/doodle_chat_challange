@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { ChatScreen } from '@features/chat/chat-screen'
-import type { PersistedMessage } from '@features/chat/domain/messages'
+import type { ChatMessage, PersistedMessage } from '@features/chat/domain/messages'
 import type { UseMessageHistoryResult } from '@features/chat/useMessageHistory'
 import type { UseChatScrollResult } from '@features/chat/useChatScroll'
 import { ApiError, API_ERROR_CATEGORIES } from '@shared/api/errors'
@@ -363,5 +363,56 @@ describe('ChatScreen', () => {
     ).not.toBeInTheDocument()
 
     vi.useRealTimers()
+  })
+
+  it('auto-scrolls to latest when a new own optimistic message appears', () => {
+    const registerOwnMessage = vi.fn()
+    let currentMessages: ChatMessage[] = [makePersistedMessage()]
+
+    mockUseChatScroll.mockReturnValue({
+      containerRef: vi.fn(),
+      isNearBottom: false,
+      unreadCount: 0,
+      scrollToLatest: vi.fn(),
+      registerInitialLoad: vi.fn(),
+      registerOwnMessage,
+      registerRemoteMessages: vi.fn(),
+      capturePrependAnchor: vi.fn(),
+      restorePrependAnchor: vi.fn(),
+    })
+
+    mockUseMessageHistory.mockImplementation(() => {
+      return {
+        messages: currentMessages,
+        syncState: 'idle',
+        initialLoading: false,
+        initialError: null,
+        retry: vi.fn(),
+        hasOlderMessages: false,
+        loadingOlder: false,
+        loadOlder: vi.fn(),
+        loadOlderError: null,
+      }
+    })
+
+    const { rerender } = renderWithProviders(<ChatScreen />)
+
+    expect(registerOwnMessage).not.toHaveBeenCalled()
+
+    currentMessages = [
+      ...currentMessages,
+      {
+        kind: 'optimistic',
+        clientId: 'client-123',
+        message: 'New local message',
+        author: 'Alex',
+        createdAt: '2026-01-02T12:00:00.000Z',
+        deliveryStatus: 'sending',
+      },
+    ]
+
+    rerender(<ChatScreen />)
+
+    expect(registerOwnMessage).toHaveBeenCalledTimes(1)
   })
 })

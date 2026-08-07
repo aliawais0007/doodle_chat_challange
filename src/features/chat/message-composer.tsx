@@ -12,7 +12,7 @@ type SubmitMessagePayload = {
 }
 
 type MessageComposerProps = {
-  onSubmit: (payload: SubmitMessagePayload) => void
+  onSubmit: (payload: SubmitMessagePayload) => void | Promise<void>
   disabled?: boolean
   maxLength?: number
   label?: string
@@ -87,7 +87,15 @@ export const MessageComposer = ({
     return null
   }
 
-  const commitSubmission = () => {
+  const toSubmitErrorMessage = (error: unknown) => {
+    if (error instanceof Error && error.message.trim().length > 0) {
+      return error.message
+    }
+
+    return 'Unable to send message. Please try again.'
+  }
+
+  const commitSubmission = async () => {
     const nextValidationError = validateDraft()
 
     if (nextValidationError) {
@@ -98,9 +106,15 @@ export const MessageComposer = ({
 
     setValidationError(null)
     const submittedMessage = draftMessage
-    setDraftMessage('')
-    onSubmit({ message: submittedMessage })
-    textareaRef.current?.focus()
+
+    try {
+      await onSubmit({ message: submittedMessage })
+      setDraftMessage('')
+      textareaRef.current?.focus()
+    } catch (error) {
+      setValidationError(toSubmitErrorMessage(error))
+      textareaRef.current?.focus()
+    }
   }
 
   const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -124,7 +138,7 @@ export const MessageComposer = ({
       return
     }
 
-    commitSubmission()
+    void commitSubmission()
   }
 
   return (
@@ -163,7 +177,9 @@ export const MessageComposer = ({
               aria-label="Send message"
               className="chat-send-button chat-focus-ring flex min-h-11 min-w-11 items-center justify-center disabled:cursor-not-allowed motion-reduce:transition-none"
               disabled={disabled}
-              onClick={commitSubmission}
+              onClick={() => {
+                void commitSubmission()
+              }}
               type="button"
             >
               Send

@@ -69,6 +69,21 @@ describe('MessageComposer', () => {
     expect(screen.getByLabelText<HTMLTextAreaElement>('Message').value).toBe('   ')
   })
 
+  it('keeps the draft and reports an error when submit fails', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockRejectedValue(new Error('Unable to send right now'))
+
+    render(<MessageComposer onSubmit={onSubmit} />)
+
+    const textarea = screen.getByLabelText<HTMLTextAreaElement>('Message')
+    await user.type(textarea, 'Hello again')
+    await user.click(screen.getByRole('button', { name: 'Send message' }))
+
+    expect(onSubmit).toHaveBeenCalledWith({ message: 'Hello again' })
+    expect(textarea.value).toBe('Hello again')
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to send right now')
+  })
+
   it('shows a character counter near the limit', () => {
     const { textarea } = setup()
 

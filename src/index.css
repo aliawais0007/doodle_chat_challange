@@ -199,6 +199,7 @@ body {
     border-radius: 0;
     background: transparent;
     box-shadow: none;
+    padding-bottom: 0.125rem;
   }
 
   .chat-empty-state {
@@ -281,8 +282,15 @@ body {
     border: 1px solid #c5d1db;
     border-radius: 0.5rem;
     background: #ffffff;
-    color: var(--app-text);
+    color: #24313b;
     caret-color: #338fca;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .chat-input:focus-visible {
+    border-color: #4b9fd2;
+    box-shadow: 0 0 0 3px rgba(75, 159, 210, 0.22);
+    outline: none;
   }
 
   .chat-input::placeholder {
@@ -301,9 +309,17 @@ body {
     border-radius: 0.5rem;
     background: var(--app-accent);
     color: #ffffff;
-    font-size: 1.875rem;
-    font-weight: 500;
-    line-height: 1;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    padding-inline: 1rem;
+    transition: background-color 160ms ease, border-color 160ms ease;
+  }
+
+  .chat-send-button:hover:not(:disabled) {
+    background: #f27051;
+    border-color: rgba(255, 255, 255, 0.35);
   }
 
   .chat-send-button:disabled {

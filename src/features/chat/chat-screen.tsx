@@ -304,6 +304,7 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
   const [showSyncRecoveredNotice, setShowSyncRecoveredNotice] = useState(false)
   const hasRegisteredInitialLoad = useRef(false)
   const knownPersistedIdsRef = useRef<Set<string>>(new Set())
+  const knownOwnOptimisticIdsRef = useRef<Set<string>>(new Set())
   const localAuthorAliasesRef = useRef<Set<string>>(new Set())
   const topLoadSentinelRef = useRef<HTMLDivElement | null>(null)
   const scrollContainerNodeRef = useRef<HTMLElement | null>(null)
@@ -360,14 +361,13 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
       })
   }, [capturePrependAnchor, hasOlderMessages, loadOlder, loadingOlder, restorePrependAnchor])
 
-  const handleComposerSubmit = ({ message }: { message: string }) => {
+  const handleComposerSubmit = async ({ message }: { message: string }) => {
     if (!displayName) {
       return
     }
 
     localAuthorAliasesRef.current.add(displayName)
-    registerOwnMessage()
-    void sendMessage({ message, author: displayName }).catch(() => undefined)
+    await sendMessage({ message, author: displayName })
   }
 
   useEffect(() => {
@@ -377,6 +377,33 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
 
     localAuthorAliasesRef.current.add(displayName)
   }, [displayName])
+
+  useEffect(() => {
+    const previousOwnOptimisticIds = knownOwnOptimisticIdsRef.current
+    const nextOwnOptimisticIds = new Set<string>()
+
+    for (const message of messages) {
+      if (message.kind !== 'optimistic') {
+        continue
+      }
+
+      if (!localAuthorAliasesRef.current.has(message.author)) {
+        continue
+      }
+
+      nextOwnOptimisticIds.add(message.clientId)
+    }
+
+    const hasNewOwnOptimisticMessage = [...nextOwnOptimisticIds].some((clientId) => {
+      return !previousOwnOptimisticIds.has(clientId)
+    })
+
+    if (hasNewOwnOptimisticMessage) {
+      registerOwnMessage()
+    }
+
+    knownOwnOptimisticIdsRef.current = nextOwnOptimisticIds
+  }, [messages, registerOwnMessage])
 
   useEffect(() => {
     const previousSyncState = previousSyncStateRef.current
@@ -525,10 +552,7 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
   }, [hasOlderMessages, initialError, initialLoading, requestOlderMessages])
 
   return (
-    <main
-      className="chat-page flex min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--app-text)]"
-      role="main"
-    >
+    <main className="chat-page flex h-dvh min-h-dvh flex-col bg-[var(--app-bg)] text-[var(--app-text)]" role="main">
       <header className="chat-header sticky top-0 z-10">
         <div className="chat-shell mx-auto flex w-full items-start justify-between gap-4">
           <div>
@@ -554,8 +578,8 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
         </div>
       </header>
 
-      <section className="flex-1 overflow-hidden">
-        <div className="chat-shell mx-auto flex h-full w-full flex-col">
+      <section className="min-h-0 flex-1 overflow-hidden">
+        <div className="chat-shell mx-auto flex h-full min-h-0 w-full flex-col">
           <div
             aria-atomic="true"
             aria-live="polite"
@@ -585,7 +609,7 @@ export const ChatScreenContent = ({ editButtonRef }: ChatScreenContentProps) => 
 
           <section
             aria-label="Conversation history"
-            className="chat-history-panel flex-1 px-3 py-4 sm:px-5"
+            className="chat-history-panel min-h-0 flex-1 px-3 py-4 sm:px-5"
             ref={setScrollContainerRef}
           >
             {initialLoading ? <HistorySkeleton /> : null}
