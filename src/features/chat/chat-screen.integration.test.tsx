@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { delay, http, HttpResponse } from 'msw'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -91,7 +91,7 @@ describe('ChatScreen optimistic composer integration', () => {
     )
   })
 
-  it('clears the composer after optimistic insertion and shows the optimistic bubble immediately', async () => {
+  it('keeps the draft while sending, then clears it after success', async () => {
     let releaseRequest: (() => void) | undefined
     const user = userEvent.setup()
 
@@ -120,8 +120,13 @@ describe('ChatScreen optimistic composer integration', () => {
     await user.keyboard('{Enter}')
 
     await waitFor(() => {
-      expect(textarea).toHaveValue('')
-      expect(screen.getByText('Hello world')).toBeInTheDocument()
+      expect(textarea).toHaveValue('Hello world')
+      expect(
+        within(screen.getByRole('region', { name: 'Conversation history' })).getByText(
+          'Hello world',
+          { exact: true }
+        )
+      ).toBeInTheDocument()
       expect(screen.getByText('Sending…')).toBeInTheDocument()
       expect(textarea).toHaveFocus()
     })
@@ -132,6 +137,7 @@ describe('ChatScreen optimistic composer integration', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Sending…')).not.toBeInTheDocument()
+      expect(textarea).toHaveValue('')
     })
   })
 
@@ -187,7 +193,11 @@ describe('ChatScreen optimistic composer integration', () => {
     await user.keyboard('{Enter}')
 
     await waitFor(() => {
-      expect(screen.getByText('Internal Server Error')).toBeInTheDocument()
+      expect(
+        within(screen.getByRole('region', { name: 'Conversation history' })).getByText(
+          'Internal Server Error'
+        )
+      ).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument()
     })
@@ -196,8 +206,17 @@ describe('ChatScreen optimistic composer integration', () => {
     await user.click(screen.getByRole('button', { name: 'Retry' }))
 
     await waitFor(() => {
-      expect(screen.queryByText('Internal Server Error')).not.toBeInTheDocument()
-      expect(screen.getByText('Retry me')).toBeInTheDocument()
+      expect(
+        within(screen.getByRole('region', { name: 'Conversation history' })).queryByText(
+          'Internal Server Error'
+        )
+      ).not.toBeInTheDocument()
+      expect(
+        within(screen.getByRole('region', { name: 'Conversation history' })).getByText(
+          'Retry me',
+          { exact: true }
+        )
+      ).toBeInTheDocument()
     })
   })
 
@@ -513,7 +532,12 @@ describe('ChatScreen optimistic composer integration', () => {
     await user.keyboard('{Enter}')
 
     await waitFor(() => {
-      expect(screen.getByText('Pending message authored with old name')).toBeInTheDocument()
+      expect(
+        within(screen.getByRole('region', { name: 'Conversation history' })).getByText(
+          'Pending message authored with old name',
+          { exact: true }
+        )
+      ).toBeInTheDocument()
     })
 
     await user.click(screen.getByRole('button', { name: 'Edit name' }))

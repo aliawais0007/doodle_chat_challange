@@ -5,7 +5,7 @@ export const handlers = [
   http.get('http://localhost:3000/health', () => {
     return HttpResponse.json({ status: 'ok' })
   }),
-  http.get('http://localhost:3000/messages', () => {
+  http.get('http://localhost:3000/api/v1/messages', () => {
     return HttpResponse.json([])
   }),
 ]

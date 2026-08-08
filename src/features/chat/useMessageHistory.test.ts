@@ -8,7 +8,7 @@ import { makeMessage } from '@test/factories'
 import { renderHookWithProviders } from '@test/renderWithProviders'
 import { server } from '@test/server'
 
-const messagesEndpoint = 'http://localhost:3000/messages'
+const messagesEndpoint = 'http://localhost:3000/api/v1/messages'
 
 describe('useMessageHistory', () => {
   it('loads the initial recent page', async () => {

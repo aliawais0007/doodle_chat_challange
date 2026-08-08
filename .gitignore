@@ -16,6 +16,7 @@ dist-ssr
 !.env.example
 playwright-report
 test-results
+coverage
 
 # Editor directories and files
 .vscode
