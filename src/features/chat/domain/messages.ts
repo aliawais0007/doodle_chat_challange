@@ -14,7 +14,7 @@ type OptimisticMessageBase = {
   createdAt: string
 }
 
-export type SendingOptimisticMessage = OptimisticMessageBase & {
+type SendingOptimisticMessage = OptimisticMessageBase & {
   deliveryStatus: 'sending'
 }
 
@@ -27,13 +27,13 @@ export type OptimisticMessage = SendingOptimisticMessage | FailedOptimisticMessa
 
 export type ChatMessage = PersistedMessage | OptimisticMessage
 
-export type TimelineDateSeparatorItem = {
+type TimelineDateSeparatorItem = {
   kind: 'date-separator'
   dateKey: string
   label: string
 }
 
-export type TimelineMessageItem = {
+type TimelineMessageItem = {
   kind: 'message'
   message: ChatMessage
   grouping: {

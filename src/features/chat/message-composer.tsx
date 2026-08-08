@@ -203,4 +203,4 @@ export const MessageComposer = ({
   )
 }
 
-export type { MessageComposerProps, SubmitMessagePayload }
+export type { MessageComposerProps }

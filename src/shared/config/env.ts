@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const envSchema = z.object({
+const envSchema = z.object({
   VITE_API_BASE_URL: z.url('VITE_API_BASE_URL must be a valid URL'),
   VITE_API_TOKEN: z.string().min(1, 'VITE_API_TOKEN is required'),
 })

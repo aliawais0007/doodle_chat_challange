@@ -54,7 +54,7 @@ export const cursorRequestParamsSchema = z
     path: ['before'],
   })
 
-export const apiValidationIssueSchema = z.object({
+const apiValidationIssueSchema = z.object({
   field: z.string(),
   message: z.string(),
 })
@@ -72,23 +72,16 @@ export const apiWrappedErrorResponseSchema = z.object({
   }),
 })
 
-export const apiErrorResponseSchema = z.union([
-  apiAuthErrorResponseSchema,
-  apiWrappedErrorResponseSchema,
-])
+const apiErrorResponseSchema = z.union([apiAuthErrorResponseSchema, apiWrappedErrorResponseSchema])
 
 export type ApiMessage = z.infer<typeof apiMessageSchema>
 export type ApiMessageListResponse = z.infer<typeof apiMessageListResponseSchema>
 export type CreateMessageInput = z.infer<typeof createMessageInputSchema>
 export type CursorRequestParams = z.infer<typeof cursorRequestParamsSchema>
 export type ApiValidationIssue = z.infer<typeof apiValidationIssueSchema>
-export type ApiAuthErrorResponse = z.infer<typeof apiAuthErrorResponseSchema>
-export type ApiWrappedErrorResponse = z.infer<typeof apiWrappedErrorResponseSchema>
-export type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>
+type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>
 
 export const parseApiMessage = (input: unknown): ApiMessage => apiMessageSchema.parse(input)
-export const parseApiMessageListResponse = (input: unknown): ApiMessageListResponse =>
-  apiMessageListResponseSchema.parse(input)
 export const parseCreateMessageInput = (input: unknown): CreateMessageInput =>
   createMessageInputSchema.parse(input)
 export const parseCursorRequestParams = (input: unknown): CursorRequestParams =>
