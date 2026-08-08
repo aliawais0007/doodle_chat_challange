@@ -492,11 +492,7 @@ describe('useMessageSync', () => {
     await settleAsyncWork()
 
     expect(capturedAfter).not.toBeNull()
-    if (!capturedAfter) {
-      throw new Error('Expected after cursor to be captured')
-    }
-
-    expect(Date.parse(capturedAfter)).toBeLessThan(Date.parse(newestTimestamp))
+    expect(Date.parse(String(capturedAfter))).toBeLessThan(Date.parse(newestTimestamp))
 
     const historyData = queryClient.getQueryData<InfiniteData<ApiMessage[]>>(historyQueryKey)
     expect(historyData?.pages[0]?.map((message) => message._id)).toEqual([

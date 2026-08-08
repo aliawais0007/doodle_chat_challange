@@ -27,7 +27,7 @@ const openFirstVisit = async (page: Page) => {
 }
 
 test('first visit lets a new user choose a display name', async ({ page }) => {
-  const backend = await createChatApiMock(page)
+  await createChatApiMock(page)
 
   await openFirstVisit(page)
 
@@ -57,7 +57,11 @@ test('sending a message survives a refresh', async ({ page }) => {
   await composer.fill('Hello from Playwright')
   await page.getByRole('button', { name: 'Send message' }).click()
 
-  await expect(page.getByText('Hello from Playwright')).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Conversation history' }).getByText('Hello from Playwright', {
+      exact: true,
+    })
+  ).toBeVisible()
 
   const postRequest = backend.requestLog.find((request) => request.method === 'POST')
 
@@ -79,7 +83,11 @@ test('failed sends can be retried without losing the draft', async ({ page }) =>
   await page.getByRole('textbox', { name: 'Message' }).fill('Retry this message')
   await page.getByRole('button', { name: 'Send message' }).click()
 
-  await expect(page.getByText('Retry this message')).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Conversation history' }).getByText('Retry this message', {
+      exact: true,
+    })
+  ).toBeVisible()
   await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Remove' })).toBeVisible()
 
@@ -87,7 +95,11 @@ test('failed sends can be retried without losing the draft', async ({ page }) =>
 
   await expect(page.getByRole('button', { name: 'Retry' })).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Remove' })).toHaveCount(0)
-  await expect(page.getByText('Retry this message')).toBeVisible()
+  await expect(
+    page.getByRole('region', { name: 'Conversation history' }).getByText('Retry this message', {
+      exact: true,
+    })
+  ).toBeVisible()
 
   const postRequests = backend.requestLog.filter((request) => request.method === 'POST')
   expect(postRequests).toHaveLength(2)
@@ -106,9 +118,9 @@ test('historical pagination loads older messages and reaches the start of the co
 
   await page.getByRole('button', { name: 'Load older messages' }).click()
 
-  await expect(page.getByText('History 10')).toBeVisible()
-  await expect(page.getByText('History 1')).toBeVisible()
-  await expect(page.getByText('Beginning of conversation')).toBeVisible()
+  await expect(page.getByText('History 10', { exact: true })).toBeVisible()
+  await expect(page.getByText('History 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('Beginning of conversation', { exact: true })).toBeVisible()
 
   const beforeRequests = backend.requestLog.filter((request) => request.method === 'GET' && request.query.has('before'))
   expect(beforeRequests).toHaveLength(1)
@@ -128,7 +140,7 @@ test('remote incoming messages follow the conversation when the user is at the b
     window.dispatchEvent(new Event('focus'))
   })
 
-  await expect(page.getByText('New at bottom')).toBeVisible()
+  await expect(page.getByText('New at bottom', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: /scroll to latest/i })).toHaveCount(0)
 })
 
@@ -140,6 +152,12 @@ test('remote incoming messages show an unread affordance when the user is readin
   await openChatWithDisplayName(page, 'Avery')
 
   const history = page.getByRole('region', { name: 'Conversation history' })
+  await expect(page.getByText('Timeline 30', { exact: true })).toBeVisible()
+  await page.waitForFunction(() => {
+    const region = document.querySelector<HTMLElement>('[aria-label="Conversation history"]')
+
+    return region !== null && region.scrollTop > 0
+  })
   await history.evaluate((element) => {
     element.scrollTop = 0
     element.dispatchEvent(new Event('scroll', { bubbles: true }))
@@ -153,11 +171,11 @@ test('remote incoming messages show an unread affordance when the user is readin
   const unreadButton = page.getByRole('button', { name: /scroll to latest\. 1 new messages\./i })
   await expect(unreadButton).toBeVisible()
   await unreadButton.click()
-  await expect(page.getByText('Unread while reading history')).toBeVisible()
+  await expect(page.getByText('Unread while reading history', { exact: true })).toBeVisible()
 })
 
 test('the chat remains usable on a narrow viewport', async ({ page }) => {
-  const backend = await createChatApiMock(page, {
+  await createChatApiMock(page, {
     initialMessages: createMessageBatch(3, { author: 'Nora', messagePrefix: 'Mobile' }),
   })
 

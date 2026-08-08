@@ -134,8 +134,14 @@ const TimelineSeparator = ({
   item: Extract<TimelineItem, { kind: 'date-separator' }>
 }) => {
   return (
-    <li className="flex justify-center py-3" role="separator" aria-label={item.label}>
-      <span className="chat-sync-status px-3 py-1 text-xs font-medium">{item.label}</span>
+    <li className="flex justify-center py-3">
+      <span
+        aria-label={item.label}
+        className="chat-sync-status px-3 py-1 text-xs font-medium"
+        role="separator"
+      >
+        {item.label}
+      </span>
     </li>
   )
 }

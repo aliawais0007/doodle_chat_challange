@@ -122,7 +122,7 @@ export const createChatApiMock = async (page: Page, options: ChatApiMockOptions 
 
     const authorization = request.headers()['authorization']
 
-    if (authorization !== undefined && authorization !== AUTHORIZATION_HEADER) {
+    if (authorization !== AUTHORIZATION_HEADER) {
       await fulfillUnauthorized(route)
       return
     }
