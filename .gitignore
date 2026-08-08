@@ -32,3 +32,6 @@ test-results
 
 # Local backend workspace (kept outside this repo)
 /api/
+
+# Local implementation notes
+/documentation/
